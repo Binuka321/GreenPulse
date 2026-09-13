@@ -148,6 +148,25 @@
 }
 
 
+.status-dot.offline,
+.connection-dot.offline {
+  background: var(--danger);
+
+  box-shadow:
+    0 0 0 4px rgba(255, 107, 107, 0.1);
+}
+
+
+.device-status-text .offline-text {
+  color: var(--danger);
+}
+
+
+.connection-status.offline {
+  color: var(--danger);
+}
+
+
 .device-status-text {
   flex: 1;
 
@@ -440,6 +459,303 @@
 
   color: white;
   background: #e35e5e;
+}
+
+
+.notification-wrapper {
+  position: relative;
+}
+
+
+.notification-panel {
+  position: absolute;
+
+  top: 48px;
+  right: 0;
+
+  width: 320px;
+
+  border-radius: 14px;
+
+  background: var(--panel);
+  border: 1px solid var(--border);
+
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+
+  z-index: 30;
+
+  overflow: hidden;
+}
+
+
+.notification-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 14px 16px;
+
+  border-bottom: 1px solid var(--border);
+
+  font-size: 12px;
+}
+
+
+.notification-panel-header span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+
+.notification-list {
+  max-height: 320px;
+
+  overflow-y: auto;
+}
+
+
+.notification-empty {
+  padding: 20px 16px;
+
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+
+.notification-item {
+  display: flex;
+  gap: 11px;
+
+  padding: 13px 16px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+
+.notification-item strong {
+  font-size: 11px;
+}
+
+
+.notification-item p {
+  margin: 4px 0 0;
+
+  font-size: 10px;
+  line-height: 1.5;
+
+  color: var(--muted);
+}
+
+
+.notification-icon {
+  width: 30px;
+  height: 30px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+}
+
+
+.notification-icon.danger {
+  color: var(--danger);
+  background: rgba(255, 107, 107, 0.1);
+}
+
+
+.notification-icon.warning {
+  color: var(--warning);
+  background: rgba(244, 201, 93, 0.1);
+}
+
+
+.notification-icon.info {
+  color: var(--blue);
+  background: rgba(100, 181, 255, 0.1);
+}
+
+
+.notification-view-all {
+  width: 100%;
+
+  padding: 12px;
+
+  border: none;
+  border-top: 1px solid var(--border);
+
+  background: transparent;
+
+  color: var(--green);
+
+  font-size: 11px;
+  font-weight: 650;
+
+  cursor: pointer;
+}
+
+
+.notification-view-all:hover {
+  background: rgba(98, 217, 139, 0.06);
+}
+
+
+.alerts-empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 18px;
+
+  border-radius: 12px;
+
+  background: rgba(98, 217, 139, 0.06);
+  border: 1px solid rgba(98, 217, 139, 0.12);
+
+  color: var(--green);
+}
+
+
+.alerts-empty p {
+  margin: 0;
+
+  color: var(--muted);
+  font-size: 11px;
+}
+
+
+/* =========================
+   SETTINGS PAGE
+========================= */
+
+.settings-field {
+  margin-bottom: 16px;
+}
+
+
+.settings-field label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-size: 11px;
+  color: var(--muted);
+}
+
+
+.settings-field input[type="text"],
+.settings-field input[type="number"] {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  border-radius: 9px;
+
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+
+  color: var(--text);
+
+  font-size: 12px;
+}
+
+
+.settings-field.settings-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+.settings-field.settings-toggle label {
+  margin-bottom: 0;
+}
+
+
+.settings-range-row {
+  padding: 14px 0;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+
+.settings-range-row:last-of-type {
+  border-bottom: none;
+}
+
+
+.settings-range-row strong {
+  display: block;
+
+  margin-bottom: 10px;
+
+  font-size: 11px;
+}
+
+
+.settings-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+
+.settings-range-inputs label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  font-size: 10px;
+  color: var(--muted);
+}
+
+
+.settings-range-inputs input {
+  width: 80px;
+
+  padding: 8px 10px;
+
+  border-radius: 8px;
+
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+
+  color: var(--text);
+
+  font-size: 12px;
+}
+
+
+.settings-unit {
+  margin-top: 14px;
+
+  font-size: 11px;
+  color: var(--muted);
+}
+
+
+.settings-actions {
+  display: flex;
+  gap: 12px;
+
+  margin-top: 18px;
+}
+
+
+.settings-saved {
+  margin: 12px 0 0;
+
+  font-size: 11px;
+  color: var(--green);
 }
 
 
@@ -899,6 +1215,64 @@
 
 .graphs-panel {
   padding: 24px;
+}
+
+
+/* =========================
+   PLANT MONITOR - RANGES
+========================= */
+
+.range-row {
+  margin-bottom: 18px;
+}
+
+
+.range-row:last-child {
+  margin-bottom: 0;
+}
+
+
+.range-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+
+  margin-bottom: 8px;
+
+  font-size: 11px;
+}
+
+
+.range-row-top span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+
+.range-track {
+  height: 8px;
+
+  border-radius: 5px;
+
+  background: rgba(255, 255, 255, 0.06);
+
+  overflow: hidden;
+}
+
+
+.range-fill {
+  height: 100%;
+
+  border-radius: 5px;
+
+  background: var(--green);
+
+  transition: width 0.3s ease;
+}
+
+
+.range-fill.out-of-range {
+  background: var(--danger);
 }
 
 

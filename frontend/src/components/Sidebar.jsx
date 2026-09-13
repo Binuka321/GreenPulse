@@ -1,5 +1,7 @@
 import { NavLink } from "react-router-dom";
 
+import useDeviceStatus from "../hooks/useDeviceStatus";
+
 import {
   LayoutDashboard,
   Sprout,
@@ -78,6 +80,8 @@ const menuItems = [
 ];
 
 function Sidebar() {
+  const { online, deviceId } = useDeviceStatus();
+
   return (
     <aside className="sidebar">
 
@@ -95,11 +99,13 @@ function Sidebar() {
 
       {/* Device status */}
       <div className="device-status-card">
-        <div className="status-dot"></div>
+        <div className={online ? "status-dot" : "status-dot offline"}></div>
 
         <div className="device-status-text">
-          <strong>GREENPULSE-001</strong>
-          <span>Device Online</span>
+          <strong>{deviceId || "GREENPULSE-001"}</strong>
+          <span className={online ? "" : "offline-text"}>
+            {online ? "Device Online" : "Device Offline"}
+          </span>
         </div>
 
         <ChevronRight size={16} />
