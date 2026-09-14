@@ -9,6 +9,8 @@ const express = require("express");
 const cors = require("cors");
 const mqtt = require("mqtt");
 const mongoose = require("mongoose");
+const { OpenAI } = require("openai");
+const axios = require("axios");
 
 // MongoDB model
 const SensorReading = require("./models/SensorReading");
@@ -25,6 +27,12 @@ const MQTT_TOPIC =
   process.env.MQTT_TOPIC || "greenpulse/sensors";
 
 const MONGODB_URI = process.env.MONGODB_URI;
+
+const openai = new OpenAI({ 
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1" 
+});
+
 
 // ============================================================
 // EXPRESS
@@ -234,6 +242,34 @@ mqttClient.on("message", async (topic, message) => {
 
     receivedAt: new Date()
   };
+
+
+  // ----------------------------------------------------------
+  // Generate AI Alert
+  // ----------------------------------------------------------
+  try {
+    const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=6.9271&lon=79.8612&appid=${process.env.WEATHER_API_KEY}&units=metric`;
+    const weatherResponse = await axios.get(weatherUrl);
+    const weatherSummary = `${weatherResponse.data.weather[0].description}, ${weatherResponse.data.main.temp}°C`;
+
+    const prompt = `
+      Indoor Plant: Moisture ${latestSensorData.soilMoisture}%, Temp ${latestSensorData.temperature}°C. 
+      Weather: ${weatherSummary}. 
+      Write a 1-sentence literature-style quote about the plant's health, and a 1-sentence watering recommendation.
+    `;
+    
+    const aiResponse = await openai.chat.completions.create({
+      model: 'openai/gpt-oss-20b',
+      messages: [{ role: 'user', content: prompt }]
+    });
+
+    const quote = aiResponse.choices[0].message.content;
+    console.log("Publishing AI alert to greenpulse/alerts...");
+    
+    mqttClient.publish("greenpulse/alerts", JSON.stringify({ quote: quote }));
+  } catch (aiError) {
+    console.error("❌ AI Generation failed:", aiError.message);
+  }
 
   // ----------------------------------------------------------
   // Display parsed data
