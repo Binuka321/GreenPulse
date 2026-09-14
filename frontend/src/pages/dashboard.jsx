@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Droplets,
@@ -15,6 +16,27 @@ function Dashboard() {
   function goToGraph(sensorKey) {
     navigate(`/graphs?sensor=${sensorKey}`);
   }
+
+
+  const [sensorData, setSensorData] = useState(null);
+
+  useEffect(() => {
+    const fetchLatestData = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/sensors/latest");
+        const json = await response.json();
+        if (json.success) {
+          setSensorData(json.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch sensor data:", error);
+      }
+    };
+
+    fetchLatestData();
+    const interval = setInterval(fetchLatestData, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="dashboard-page">
@@ -102,45 +124,40 @@ function Dashboard() {
         <SensorCard
           icon={<Droplets />}
           title="Soil Moisture"
-          value="0"
+          value={sensorData ? sensorData.soilMoisture : "--"}
           unit="%"
-          status="Needs Water"
-          type="danger"
-          trend="-12%"
-          down
+          status={sensorData && sensorData.soilMoisture < 40 ? "Needs Water" : "Good"}
+          type={sensorData && sensorData.soilMoisture < 40 ? "danger" : "success"}
           onClick={() => goToGraph("soilMoisture")}
         />
 
         <SensorCard
           icon={<Thermometer />}
           title="Temperature"
-          value="33.1"
+          value={sensorData ? sensorData.temperature : "--"}
           unit="°C"
-          status="Warm"
-          type="warning"
-          trend="+2.4%"
+          status={sensorData && sensorData.temperature > 30 ? "Warm" : "Good"}
+          type={sensorData && sensorData.temperature > 30 ? "warning" : "success"}
           onClick={() => goToGraph("temperature")}
         />
 
         <SensorCard
           icon={<Wind />}
           title="Humidity"
-          value="75.8"
+          value={sensorData ? sensorData.humidity : "--"}
           unit="%"
           status="Good"
           type="success"
-          trend="+4.1%"
           onClick={() => goToGraph("humidity")}
         />
 
         <SensorCard
           icon={<Activity />}
           title="Motion"
-          value="Detected"
+          value={sensorData && sensorData.motion ? "Detected" : "Clear"}
           unit=""
-          status="Activity detected"
+          status={sensorData && sensorData.motion ? "Activity detected" : "No activity"}
           type="info"
-          trend="Active"
           onClick={() => goToGraph("motion")}
         />
 
