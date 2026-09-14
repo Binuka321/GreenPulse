@@ -18,13 +18,13 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
-          <Route path="plant-monitor" element={<PlantMonitor />} />
+          {/* <Route path="plant-monitor" element={<PlantMonitor />} /> */}
           <Route path="watering" element={<Watering />} />
           <Route path="weather" element={<Weather />} />
           <Route path="ai-care" element={<AICare />} />
-          <Route path="alerts" element={<Alerts />} />
-          <Route path="device" element={<Device />} />
-          <Route path="settings" element={<Settings />} />
+          {/* <Route path="alerts" element={<Alerts />} /> */}
+          {/* <Route path="device" element={<Device />} /> */}
+          {/* <Route path="settings" element={<Settings />} /> */}
           <Route path="graphs" element={<Graphs />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
