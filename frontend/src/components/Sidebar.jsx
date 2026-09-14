@@ -25,11 +25,11 @@ const menuItems = [
         path: "/",
         icon: LayoutDashboard,
       },
-      {
-        name: "Plant Monitor",
-        path: "/plant-monitor",
-        icon: Sprout,
-      },
+      // {
+      //   name: "Plant Monitor",
+      //   path: "/plant-monitor",
+      //   icon: Sprout,
+      // },
       {
         name: "Graphs",
         path: "/graphs",
@@ -57,26 +57,26 @@ const menuItems = [
       },
     ],
   },
-  {
-    section: "SYSTEM",
-    items: [
-      {
-        name: "Alerts",
-        path: "/alerts",
-        icon: Bell,
-      },
-      {
-        name: "Device",
-        path: "/device",
-        icon: Cpu,
-      },
-      {
-        name: "Settings",
-        path: "/settings",
-        icon: Settings,
-      },
-    ],
-  },
+  // {
+  //   section: "SYSTEM",
+  //   items: [
+  //     {
+  //       name: "Alerts",
+  //       path: "/alerts",
+  //       icon: Bell,
+  //     },
+  //     // {
+  //     //   name: "Device",
+  //     //   path: "/device",
+  //     //   icon: Cpu,
+  //     // },
+  //     // {
+  //     //   name: "Settings",
+  //     //   path: "/settings",
+  //     //   icon: Settings,
+  //     // },
+  //   ],
+  // },
 ];
 
 function Sidebar() {
@@ -112,7 +112,6 @@ function Sidebar() {
           </span>
         </div>
 
-        <ChevronRight size={16} />
       </div>
 
       {/* Navigation */}
@@ -147,7 +146,7 @@ function Sidebar() {
       </nav>
 
       {/* Bottom plant card */}
-      <div className="sidebar-bottom-card">
+      {/* <div className="sidebar-bottom-card">
 
         <div className="mini-plant">
           🌱
@@ -158,7 +157,7 @@ function Sidebar() {
           <span>Healthy & Growing</span>
         </div>
 
-      </div>
+      </div> */}
 
     </aside>
   );
