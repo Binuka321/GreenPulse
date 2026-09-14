@@ -85,17 +85,21 @@ function Sidebar() {
   return (
     <aside className="sidebar">
 
-      {/* Logo */}
-      <div className="brand">
-        <div className="brand-icon">
-          <Leaf size={23} />
-        </div>
+{/* Logo */}
+<div className="brand">
+  <div className="brand-icon">
+    <img
+      src="/GreenPulse Smart Plant Logo.png"
+      alt="GreenPulse logo"
+    />
+  </div>
 
-        <div>
-          <div className="brand-name">GreenPulse</div>
-          <div className="brand-subtitle">SMART PLANT CARE</div>
-        </div>
-      </div>
+  <div>
+    <div className="brand-name ">GreenPulse</div>
+    <div className="brand-subtitle">SMART PLANT CARE</div>
+  </div>
+</div>
+
 
       {/* Device status */}
       <div className="device-status-card">
