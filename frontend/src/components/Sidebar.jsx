@@ -102,7 +102,7 @@ function Sidebar() {
         <div className={online ? "status-dot" : "status-dot offline"}></div>
 
         <div className="device-status-text">
-          <strong>{deviceId || "GREENPULSE-001"}</strong>
+          <strong>{deviceId || "No device"}</strong>
           <span className={online ? "" : "offline-text"}>
             {online ? "Device Online" : "Device Offline"}
           </span>

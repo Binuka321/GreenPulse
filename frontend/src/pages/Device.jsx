@@ -76,11 +76,11 @@ function Device() {
 
           <div>
             <p className="small-label">DEVICE ID</p>
-            <h2>{deviceId || "GREENPULSE-001"}</h2>
+            <h2>{deviceId || "No device detected"}</h2>
             <p>
               {online
                 ? "Device is online and sending live sensor data."
-                : "Device hasn't reported in recently. Check power and Wi-Fi."}
+                : "No sensor data has been received from a device yet. Check power and Wi-Fi."}
             </p>
           </div>
         </div>
