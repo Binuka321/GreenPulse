@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Droplets,
@@ -11,9 +12,66 @@ import {
 
 function Dashboard() {
   const navigate = useNavigate();
+  const [sensorData, setSensorData] = useState(null);
+  const [recentLogs, setRecentLogs] = useState([]);
+
+  // Single unified data fetching hook
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const sensorRes = await fetch("http://localhost:5000/api/sensors/latest");
+        const sensorJson = await sensorRes.json();
+        if (sensorJson.success) setSensorData(sensorJson.data);
+
+        const logsRes = await fetch("http://localhost:5000/api/watering");
+        const logsJson = await logsRes.json();
+        if (logsJson.success) setRecentLogs(logsJson.data.slice(0, 4));
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   function goToGraph(sensorKey) {
     navigate(`/graphs?sensor=${sensorKey}`);
+  }
+
+  // Dynamic Health Score & Status Calculation
+  let healthScore = "--";
+  let healthTitle = "Waiting for data";
+  let healthDesc = "Please inject sensor data from Node-RED.";
+  let status = "healthy"; 
+  let headerText = "feeling good."; // Declared safely here
+
+  if (sensorData) {
+    healthScore = 100;
+    let issues = 0;
+
+    if (sensorData.soilMoisture < 40 || sensorData.soilMoisture > 85) issues++;
+    if (sensorData.temperature < 15 || sensorData.temperature > 30) issues++;
+
+    if (issues === 0) {
+      healthTitle = "Looking Great";
+      healthDesc = "Your environmental conditions are currently within a healthy range.";
+      status = "healthy";
+      headerText = "feeling good.";
+    } else if (issues === 1) {
+      healthScore = 75;
+      healthTitle = "Needs Attention";
+      healthDesc = "One of your environmental factors is outside the ideal range.";
+      status = "warning";
+      headerText = "needing attention.";
+    } else {
+      healthScore = 45;
+      healthTitle = "Critical Condition";
+      healthDesc = "Multiple factors are dangerous. Immediate action required.";
+      status = "danger";
+      headerText = "at risk!";
+    }
   }
 
   return (
@@ -21,13 +79,14 @@ function Dashboard() {
 
       {/* Page heading */}
       <div className="page-heading">
-
         <div>
           <p className="eyebrow">GOOD MORNING</p>
 
           <h1>
             Your plant is
-            <span> feeling good.</span>
+            <span style={{
+              color: status === 'danger' ? '#ef4444' : status === 'warning' ? '#f59e0b' : '#62d98b'
+            }}> {headerText}</span>
           </h1>
 
           <p className="page-description">
@@ -39,45 +98,34 @@ function Dashboard() {
           <span>DEVICE</span>
           <strong>GREENPULSE-001</strong>
         </div>
-
       </div>
 
-
       {/* Main status */}
-      <div className="plant-health-card">
-
+      <div className="plant-health-card" style={{
+        borderColor: status === 'danger' ? 'rgba(239, 68, 68, 0.4)' : status === 'warning' ? 'rgba(245, 158, 11, 0.4)' : 'rgba(98, 217, 139, 0.2)'
+      }}>
         <div className="plant-health-left">
-
-          <div className="plant-image">
-            🌿
-          </div>
-
+          <div className="plant-image" style={{
+            background: status === 'danger' ? 'rgba(239, 68, 68, 0.1)' : status === 'warning' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(98, 217, 139, 0.1)',
+            color: status === 'danger' ? '#ef4444' : status === 'warning' ? '#f59e0b' : '#62d98b'
+          }}>🌿</div>
           <div>
             <p className="small-label">PLANT HEALTH</p>
-
-            <h2>
-              Looking Great
-            </h2>
-
-            <p>
-              Your environmental conditions are currently
-              within a healthy range.
-            </p>
+            <h2>{healthTitle}</h2>
+            <p>{healthDesc}</p>
           </div>
-
         </div>
 
         <div className="health-score">
-
-          <div className="score-circle">
-            <strong>86</strong>
+          <div className="score-circle" style={{
+            borderColor: status === 'danger' ? '#ef4444' : status === 'warning' ? '#f59e0b' : '#62d98b',
+            color: status === 'danger' ? '#ef4444' : status === 'warning' ? '#f59e0b' : '#62d98b'
+          }}>
+            <strong>{healthScore}</strong>
             <span>/100</span>
           </div>
-
           <span>Health Score</span>
-
         </div>
-
       </div>
 
 
@@ -102,45 +150,40 @@ function Dashboard() {
         <SensorCard
           icon={<Droplets />}
           title="Soil Moisture"
-          value="0"
+          value={sensorData ? sensorData.soilMoisture : "--"}
           unit="%"
-          status="Needs Water"
-          type="danger"
-          trend="-12%"
-          down
+          status={sensorData && sensorData.soilMoisture < 40 ? "Needs Water" : "Good"}
+          type={sensorData && sensorData.soilMoisture < 40 ? "danger" : "success"}
           onClick={() => goToGraph("soilMoisture")}
         />
 
         <SensorCard
           icon={<Thermometer />}
           title="Temperature"
-          value="33.1"
+          value={sensorData ? sensorData.temperature : "--"}
           unit="°C"
-          status="Warm"
-          type="warning"
-          trend="+2.4%"
+          status={sensorData && sensorData.temperature > 30 ? "Warm" : "Good"}
+          type={sensorData && sensorData.temperature > 30 ? "warning" : "success"}
           onClick={() => goToGraph("temperature")}
         />
 
         <SensorCard
           icon={<Wind />}
           title="Humidity"
-          value="75.8"
+          value={sensorData ? sensorData.humidity : "--"}
           unit="%"
           status="Good"
           type="success"
-          trend="+4.1%"
           onClick={() => goToGraph("humidity")}
         />
 
         <SensorCard
           icon={<Activity />}
           title="Motion"
-          value="Detected"
+          value={sensorData && sensorData.motion ? "Detected" : "Clear"}
           unit=""
-          status="Activity detected"
+          status={sensorData && sensorData.motion ? "Activity detected" : "No activity"}
           type="info"
-          trend="Active"
           onClick={() => goToGraph("motion")}
         />
 
@@ -152,102 +195,65 @@ function Dashboard() {
 
         {/* Quick care */}
         <div className="dashboard-panel">
-
           <div className="panel-header">
-
             <div>
               <p className="eyebrow">PLANT CARE</p>
-              <h3>Today's Recommendations</h3>
+              <h3>Live Recommendations</h3>
             </div>
-
             <Sprout size={22} />
-
           </div>
 
-          <div className="recommendation">
-
-            <div className="recommendation-icon water">
-              💧
+          {sensorData && sensorData.soilMoisture < 40 && (
+            <div className="recommendation">
+              <div className="recommendation-icon water">💧</div>
+              <div>
+                <strong>Water your plant</strong>
+                <p>Soil moisture is critically low at {sensorData.soilMoisture}%. AI predicts the plant needs water.</p>
+              </div>
             </div>
+          )}
 
-            <div>
-              <strong>Water your plant</strong>
-
-              <p>
-                Soil moisture is below the recommended
-                threshold. Your plant may need water.
-              </p>
+          {sensorData && sensorData.temperature > 30 && (
+            <div className="recommendation">
+              <div className="recommendation-icon temperature">☀️</div>
+              <div>
+                <strong>Temperature is high</strong>
+                <p>Current reading is {sensorData.temperature}°C. Consider moving away from direct heat.</p>
+              </div>
             </div>
+          )}
 
-            <ArrowUpRight size={18} />
-
-          </div>
-
-
-          <div className="recommendation">
-
-            <div className="recommendation-icon temperature">
-              ☀️
+          {sensorData && sensorData.soilMoisture >= 40 && sensorData.temperature <= 30 && (
+            <div style={{ padding: '20px' }}>
+              <p>Conditions are optimal. No action required.</p>
             </div>
-
-            <div>
-              <strong>Temperature is warm</strong>
-
-              <p>
-                Consider moving your plant away from
-                direct afternoon sunlight.
-              </p>
-            </div>
-
-            <ArrowUpRight size={18} />
-
-          </div>
-
+          )}
         </div>
-
 
         {/* Activity */}
         <div className="dashboard-panel">
-
           <div className="panel-header">
-
             <div>
               <p className="eyebrow">SYSTEM</p>
-              <h3>Recent Activity</h3>
+              <h3>Recent Watering</h3>
             </div>
-
           </div>
 
           <div className="activity-list">
-
-            <ActivityItem
-              time="Just now"
-              title="Sensor data received"
-              description="ESP32 sent new environmental readings"
-            />
-
-            <ActivityItem
-              time="3 min ago"
-              title="Motion detected"
-              description="Movement detected near your plant"
-            />
-
-            <ActivityItem
-              time="8 min ago"
-              title="MQTT connected"
-              description="GreenPulse device connected successfully"
-            />
-
-            <ActivityItem
-              time="12 min ago"
-              title="System started"
-              description="GreenPulse monitoring started"
-            />
-
+            {recentLogs.length > 0 ? (
+              recentLogs.map((log) => (
+                <ActivityItem
+                  key={log._id}
+                  time={new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  title="Plant Watered"
+                  description="Watering event logged in database"
+                />
+              ))
+            ) : (
+              <p style={{ padding: '20px' }}>No recent activity.</p>
+            )}
           </div>
-
         </div>
-
       </div>
 
     </div>

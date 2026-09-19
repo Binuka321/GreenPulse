@@ -38,6 +38,8 @@ const sensorReadingSchema = new mongoose.Schema(
       required: true
     },
 
+    predictedHours: Number,
+
     esp32Timestamp: {
       type: Number,
       default: null
@@ -47,7 +49,7 @@ const sensorReadingSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
       index: true
-    }
+    },
   },
   {
     timestamps: true

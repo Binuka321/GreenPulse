@@ -72,8 +72,6 @@
 
   padding: 4px 8px 26px;
 }
-
-
 .brand-icon {
   width: 42px;
   height: 42px;
@@ -82,21 +80,27 @@
   align-items: center;
   justify-content: center;
 
+  flex-shrink: 0;
+
   border-radius: 13px;
 
-  color: #07100c;
-
-  background:
-    linear-gradient(
-      135deg,
-      #77e59b,
-      #3cb96b
-    );
+  background: linear-gradient(
+    135deg,
+    #ffffff
+  );
 
   box-shadow:
     0 8px 25px rgba(73, 208, 116, 0.18);
+
+  overflow: hidden;
 }
 
+.brand-icon img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  display: block;
+}
 
 .brand-name {
   font-size: 18px;

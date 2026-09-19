@@ -9,9 +9,12 @@ const express = require("express");
 const cors = require("cors");
 const mqtt = require("mqtt");
 const mongoose = require("mongoose");
+const { OpenAI } = require("openai");
+const axios = require("axios");
 
 // MongoDB model
 const SensorReading = require("./models/SensorReading");
+const WateringLog = require("./models/WateringLog");
 
 // ============================================================
 // CONFIGURATION
@@ -25,6 +28,12 @@ const MQTT_TOPIC =
   process.env.MQTT_TOPIC || "greenpulse/sensors";
 
 const MONGODB_URI = process.env.MONGODB_URI;
+
+const openai = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1"
+});
+
 
 // ============================================================
 // EXPRESS
@@ -206,32 +215,62 @@ mqttClient.on("message", async (topic, message) => {
   }
 
   // ----------------------------------------------------------
-  // Store latest data in memory
+  // 1. Generate AI Alert & Prediction FIRST (so variables exist)
+  // ----------------------------------------------------------
+  let predictedHoursValue = null;
+  let aiQuoteText = "System operating normally.";
+
+  try {
+    const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=6.9271&lon=79.8612&appid=${process.env.WEATHER_API_KEY}&units=metric`;
+    const weatherResponse = await axios.get(weatherUrl);
+    const weatherSummary = `${weatherResponse.data.weather[0].description}, ${weatherResponse.data.main.temp}°C`;
+
+    const prompt = `
+    Indoor Plant Status: Soil Moisture ${sensorData.soilMoisture}%, Temp ${sensorData.temperature}°C. 
+    Weather: ${weatherSummary}. 
+    
+    You are an AI plant care agent. Based on the soil moisture, estimate how many hours until the plant needs water (assume it needs water at 30%). 
+    
+    Respond ONLY with a valid JSON object in this exact format:
+    {
+      "quote": "A 1-sentence literature-style quote about the plant's health.",
+      "hoursUntilWater": 12
+    }
+  `;
+
+    const aiResponse = await openai.chat.completions.create({
+      model: 'openai/gpt-oss-20b',
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: "json_object" }
+    });
+
+    const aiData = JSON.parse(aiResponse.choices[0].message.content);
+
+    aiQuoteText = aiData.quote;
+    predictedHoursValue = aiData.hoursUntilWater;
+
+    console.log("AI Quote:", aiQuoteText);
+    console.log("Predicted hours until water:", predictedHoursValue);
+
+    mqttClient.publish("greenpulse/alerts", JSON.stringify({ quote: aiQuoteText }));
+  } catch (aiError) {
+    console.error("❌ AI Generation failed:", aiError.message);
+  }
+
+  // ----------------------------------------------------------
+  // 2. Store latest data in memory (now variables are available)
   // ----------------------------------------------------------
 
   latestSensorData = {
     deviceId: sensorData.deviceId,
-
     soilRaw: sensorData.soilRaw ?? null,
-
-    soilMoisture:
-      sensorData.soilMoisture ?? null,
-
-    temperature:
-      sensorData.temperature ?? null,
-
-    humidity:
-      sensorData.humidity ?? null,
-
-    motion:
-      sensorData.motion ?? false,
-
-    plantStatus:
-      sensorData.plantStatus ?? "UNKNOWN",
-
-    esp32Timestamp:
-      sensorData.timestamp ?? null,
-
+    soilMoisture: sensorData.soilMoisture ?? null,
+    temperature: sensorData.temperature ?? null,
+    humidity: sensorData.humidity ?? null,
+    motion: sensorData.motion ?? false,
+    plantStatus: sensorData.plantStatus ?? "UNKNOWN",
+    predictedHours: predictedHoursValue,
+    esp32Timestamp: sensorData.timestamp ?? null,
     receivedAt: new Date()
   };
 
@@ -242,54 +281,17 @@ mqttClient.on("message", async (topic, message) => {
   console.log();
   console.log("Parsed Sensor Data");
   console.log("---------------------------------");
-
-  console.log(
-    "Device ID:",
-    latestSensorData.deviceId
-  );
-
-  console.log(
-    "Soil Raw:",
-    latestSensorData.soilRaw
-  );
-
-  console.log(
-    "Soil Moisture:",
-    latestSensorData.soilMoisture + "%"
-  );
-
-  console.log(
-    "Temperature:",
-    latestSensorData.temperature + " °C"
-  );
-
-  console.log(
-    "Humidity:",
-    latestSensorData.humidity + "%"
-  );
-
-  console.log(
-    "Motion:",
-    latestSensorData.motion
-  );
-
-  console.log(
-    "Plant Status:",
-    latestSensorData.plantStatus
-  );
-
-  console.log(
-    "ESP32 Timestamp:",
-    latestSensorData.esp32Timestamp
-  );
-
-  console.log(
-    "Received At:",
-    latestSensorData.receivedAt.toISOString()
-  );
-
+  console.log("Device ID:", latestSensorData.deviceId);
+  console.log("Soil Raw:", latestSensorData.soilRaw);
+  console.log("Soil Moisture:", latestSensorData.soilMoisture + "%");
+  console.log("Temperature:", latestSensorData.temperature + " °C");
+  console.log("Humidity:", latestSensorData.humidity + "%");
+  console.log("Motion:", latestSensorData.motion);
+  console.log("Plant Status:", latestSensorData.plantStatus);
+  console.log("Predicted Hours:", latestSensorData.predictedHours);
+  console.log("ESP32 Timestamp:", latestSensorData.esp32Timestamp);
+  console.log("Received At:", latestSensorData.receivedAt.toISOString());
   console.log("---------------------------------");
-
   console.log("✓ Sensor data stored in memory");
 
   // ----------------------------------------------------------
@@ -302,40 +304,23 @@ mqttClient.on("message", async (topic, message) => {
   }
 
   try {
-
     const reading = new SensorReading({
       deviceId: latestSensorData.deviceId,
-
       soilRaw: latestSensorData.soilRaw,
-
-      soilMoisture:
-        latestSensorData.soilMoisture,
-
-      temperature:
-        latestSensorData.temperature,
-
-      humidity:
-        latestSensorData.humidity,
-
-      motion:
-        latestSensorData.motion,
-
-      plantStatus:
-        latestSensorData.plantStatus,
-
-      esp32Timestamp:
-        latestSensorData.esp32Timestamp,
-
-      receivedAt:
-        latestSensorData.receivedAt
+      soilMoisture: latestSensorData.soilMoisture,
+      temperature: latestSensorData.temperature,
+      humidity: latestSensorData.humidity,
+      motion: latestSensorData.motion,
+      plantStatus: latestSensorData.plantStatus,
+      predictedHours: latestSensorData.predictedHours,
+      esp32Timestamp: latestSensorData.esp32Timestamp,
+      receivedAt: latestSensorData.receivedAt
     });
 
     await reading.save();
-
     console.log("✓ Sensor data stored in MongoDB");
 
   } catch (error) {
-
     console.error();
     console.error("❌ MongoDB save failed:");
     console.error(error.message);
@@ -501,6 +486,67 @@ app.get("/api/health", (req, res) => {
     timestamp: new Date().toISOString()
   });
 
+});
+
+// ============================================================
+// WATERING LOGS
+// ============================================================
+
+app.get("/api/watering", async (req, res) => {
+  try {
+    const logs = await WateringLog.find().sort({ timestamp: -1 }).limit(20);
+    res.json({ success: true, data: logs });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to fetch logs" });
+  }
+});
+
+app.post("/api/watering", async (req, res) => {
+  try {
+    const newLog = new WateringLog();
+    await newLog.save();
+    res.json({ success: true, data: newLog });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to save log" });
+  }
+});
+
+// ============================================================
+// AI CHATBOT (User Interaction Bonus)
+// ============================================================
+
+app.post("/api/chat", async (req, res) => {
+  try {
+    const { question } = req.body;
+    
+    if (!latestSensorData) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "No sensor data available yet. Please inject a payload from Node-RED." 
+      });
+    }
+
+    const prompt = `
+      You are GreenPulse, a helpful AI plant care assistant. 
+      Current Plant Status: Soil Moisture ${latestSensorData.soilMoisture}%, Temperature ${latestSensorData.temperature}°C, Humidity ${latestSensorData.humidity}%.
+      The user asks: "${question}"
+      Answer briefly (1-2 sentences) and directly based on the live plant status.
+    `;
+
+    const aiResponse = await openai.chat.completions.create({
+      model: 'openai/gpt-oss-20b',
+      messages: [{ role: 'user', content: prompt }]
+    });
+
+    res.json({ 
+      success: true, 
+      answer: aiResponse.choices[0].message.content 
+    });
+
+  } catch (error) {
+    console.error("Chat API error:", error.message);
+    res.status(500).json({ success: false, message: "AI failed to respond." });
+  }
 });
 
 // ============================================================

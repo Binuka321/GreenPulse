@@ -1,0 +1,491 @@
+[
+    {
+        "id": "d5ed3eb00bad5187",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "d2a8d24ec17dd9b1",
+        "type": "mqtt in",
+        "z": "d5ed3eb00bad5187",
+        "name": "",
+        "topic": "greenpulse/sensors",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "319bffab291fd55a",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 370,
+        "y": 340,
+        "wires": [
+            [
+                "2d0976abe5194a74"
+            ]
+        ]
+    },
+    {
+        "id": "b56d9be5f00ef77a",
+        "type": "function",
+        "z": "d5ed3eb00bad5187",
+        "name": "function 1",
+        "func": "msg.payload = msg.payload.soilMoisture; return msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 400,
+        "wires": [
+            [
+                "285e74b9ddd43721"
+            ]
+        ]
+    },
+    {
+        "id": "285e74b9ddd43721",
+        "type": "ui-gauge",
+        "z": "d5ed3eb00bad5187",
+        "name": "",
+        "group": "e4f34caba4d76a53",
+        "order": 1,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "gauge",
+        "alwaysShowTitle": false,
+        "floatingTitlePosition": "top-left",
+        "units": "units",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#5cd65c",
+                "text": "",
+                "textType": "label"
+            },
+            {
+                "from": "4",
+                "color": "#ffc800",
+                "text": "",
+                "textType": "label"
+            },
+            {
+                "from": "7",
+                "color": "#ea5353",
+                "text": "",
+                "textType": "label"
+            }
+        ],
+        "min": 0,
+        "max": "100",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 950,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5637250b8bd5405d",
+        "type": "ui-text",
+        "z": "d5ed3eb00bad5187",
+        "group": "e4f34caba4d76a53",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Temperature",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "x": 1010,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "2d0976abe5194a74",
+        "type": "json",
+        "z": "d5ed3eb00bad5187",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 550,
+        "y": 400,
+        "wires": [
+            [
+                "b56d9be5f00ef77a",
+                "9a9bc26c267aa716",
+                "af64300feb57d8fe"
+            ]
+        ]
+    },
+    {
+        "id": "9a9bc26c267aa716",
+        "type": "function",
+        "z": "d5ed3eb00bad5187",
+        "name": "temperature function",
+        "func": "msg.payload = msg.payload.temperature; \nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 800,
+        "y": 460,
+        "wires": [
+            [
+                "5637250b8bd5405d"
+            ]
+        ]
+    },
+    {
+        "id": "af64300feb57d8fe",
+        "type": "function",
+        "z": "d5ed3eb00bad5187",
+        "name": "humidity function",
+        "func": "msg.payload = msg.payload.humidity; return msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 520,
+        "wires": [
+            [
+                "5c55668e892979ae"
+            ]
+        ]
+    },
+    {
+        "id": "5c55668e892979ae",
+        "type": "ui-text",
+        "z": "d5ed3eb00bad5187",
+        "group": "e4f34caba4d76a53",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Humidity",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "x": 1000,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "7f19ed5c6b262eb8",
+        "type": "mqtt in",
+        "z": "d5ed3eb00bad5187",
+        "name": "",
+        "topic": "greenpulse/alerts",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "319bffab291fd55a",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 360,
+        "y": 560,
+        "wires": [
+            [
+                "1e612472979d97e9"
+            ]
+        ]
+    },
+    {
+        "id": "1e612472979d97e9",
+        "type": "json",
+        "z": "d5ed3eb00bad5187",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 550,
+        "y": 600,
+        "wires": [
+            [
+                "5972eaaa42a58c99"
+            ]
+        ]
+    },
+    {
+        "id": "5972eaaa42a58c99",
+        "type": "ui-text",
+        "z": "d5ed3eb00bad5187",
+        "group": "e4f34caba4d76a53",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "AI alert",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "ayload.quote",
+        "valueType": "msg",
+        "x": 740,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "0eed67865bf38f44",
+        "type": "status",
+        "z": "d5ed3eb00bad5187",
+        "name": "",
+        "scope": [
+            "7f19ed5c6b262eb8",
+            "d2a8d24ec17dd9b1"
+        ],
+        "x": 340,
+        "y": 660,
+        "wires": [
+            [
+                "5b695a103458fc7c"
+            ]
+        ]
+    },
+    {
+        "id": "5b695a103458fc7c",
+        "type": "ui-text",
+        "z": "d5ed3eb00bad5187",
+        "group": "e4f34caba4d76a53",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Status",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "status.text",
+        "valueType": "msg",
+        "x": 550,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "4c6a8b7ef7c05d3a",
+        "type": "inject",
+        "z": "d5ed3eb00bad5187",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"deviceId\":\"GreenPulse\",\"soilRaw\":3200,\"soilMoisture\":30,\"temperature\":28.5,\"humidity\":75,\"motion\":true,\"plantStatus\":\"WATER\"}",
+        "payloadType": "json",
+        "x": 270,
+        "y": 480,
+        "wires": [
+            [
+                "b56d9be5f00ef77a",
+                "9a9bc26c267aa716",
+                "af64300feb57d8fe",
+                "e5b3c7d4a54a3699"
+            ]
+        ]
+    },
+    {
+        "id": "e5b3c7d4a54a3699",
+        "type": "mqtt out",
+        "z": "d5ed3eb00bad5187",
+        "name": "",
+        "topic": "greenpulse/sensors",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "319bffab291fd55a",
+        "x": 630,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "319bffab291fd55a",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "broker.hivemq.com",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "e4f34caba4d76a53",
+        "type": "ui-group",
+        "name": "Sensor Data",
+        "page": "850d334dc08b9f8f",
+        "width": 6,
+        "height": 1,
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "850d334dc08b9f8f",
+        "type": "ui-page",
+        "name": "GreenPulse",
+        "ui": "606cca4dd7b21401",
+        "path": "/page1",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "e7368009708c392a",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "606cca4dd7b21401",
+        "type": "ui-base",
+        "name": "My Dashboard",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "headerContent": "page",
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": 1,
+        "showDisconnectNotification": true,
+        "allowInstall": false
+    },
+    {
+        "id": "e7368009708c392a",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#fcfcfd",
+            "primary": "#0d74ce",
+            "bgPage": "#f9f9fb",
+            "groupBg": "#ffffff",
+            "groupOutline": "#d9d9e0"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "8fc64dd6b6e85986",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "@flowfuse/node-red-dashboard": "1.31.0"
+        }
+    }
+]

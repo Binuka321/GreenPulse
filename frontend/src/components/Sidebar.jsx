@@ -25,11 +25,11 @@ const menuItems = [
         path: "/",
         icon: LayoutDashboard,
       },
-      {
-        name: "Plant Monitor",
-        path: "/plant-monitor",
-        icon: Sprout,
-      },
+      // {
+      //   name: "Plant Monitor",
+      //   path: "/plant-monitor",
+      //   icon: Sprout,
+      // },
       {
         name: "Graphs",
         path: "/graphs",
@@ -57,26 +57,26 @@ const menuItems = [
       },
     ],
   },
-  {
-    section: "SYSTEM",
-    items: [
-      {
-        name: "Alerts",
-        path: "/alerts",
-        icon: Bell,
-      },
-      {
-        name: "Device",
-        path: "/device",
-        icon: Cpu,
-      },
-      {
-        name: "Settings",
-        path: "/settings",
-        icon: Settings,
-      },
-    ],
-  },
+  // {
+  //   section: "SYSTEM",
+  //   items: [
+  //     {
+  //       name: "Alerts",
+  //       path: "/alerts",
+  //       icon: Bell,
+  //     },
+  //     // {
+  //     //   name: "Device",
+  //     //   path: "/device",
+  //     //   icon: Cpu,
+  //     // },
+  //     // {
+  //     //   name: "Settings",
+  //     //   path: "/settings",
+  //     //   icon: Settings,
+  //     // },
+  //   ],
+  // },
 ];
 
 function Sidebar() {
@@ -85,17 +85,21 @@ function Sidebar() {
   return (
     <aside className="sidebar">
 
-      {/* Logo */}
-      <div className="brand">
-        <div className="brand-icon">
-          <Leaf size={23} />
-        </div>
+{/* Logo */}
+<div className="brand">
+  <div className="brand-icon">
+    <img
+      src="/GreenPulse Smart Plant Logo.png"
+      alt="GreenPulse logo"
+    />
+  </div>
 
-        <div>
-          <div className="brand-name">GreenPulse</div>
-          <div className="brand-subtitle">SMART PLANT CARE</div>
-        </div>
-      </div>
+  <div>
+    <div className="brand-name ">GreenPulse</div>
+    <div className="brand-subtitle">SMART PLANT CARE</div>
+  </div>
+</div>
+
 
       {/* Device status */}
       <div className="device-status-card">
@@ -108,7 +112,6 @@ function Sidebar() {
           </span>
         </div>
 
-        <ChevronRight size={16} />
       </div>
 
       {/* Navigation */}
@@ -143,7 +146,7 @@ function Sidebar() {
       </nav>
 
       {/* Bottom plant card */}
-      <div className="sidebar-bottom-card">
+      {/* <div className="sidebar-bottom-card">
 
         <div className="mini-plant">
           🌱
@@ -154,7 +157,7 @@ function Sidebar() {
           <span>Healthy & Growing</span>
         </div>
 
-      </div>
+      </div> */}
 
     </aside>
   );

@@ -1,156 +1,131 @@
-import { useMemo } from "react";
-import { Sparkles, Droplets, Thermometer, Wind, Activity } from "lucide-react";
-import useDeviceStatus from "../hooks/useDeviceStatus";
-import useSettings from "../hooks/useSettings";
-
-function buildTips(reading, online, ranges) {
-  const tips = [];
-
-  if (!online || !reading) {
-    tips.push({
-      id: "offline",
-      icon: Activity,
-      type: "temperature",
-      title: "Waiting for live data",
-      message:
-        "Once your GreenPulse device reports sensor data, recommendations will appear here.",
-    });
-
-    return tips;
-  }
-
-  const { soilMoisture, temperature, humidity } = reading;
-  const soilRange = ranges.soilMoisture;
-  const tempRange = ranges.temperature;
-  const humidityRange = ranges.humidity;
-
-  if (soilMoisture < soilRange.min) {
-    tips.push({
-      id: "soil-low",
-      icon: Droplets,
-      type: "water",
-      title: "Water your plant soon",
-      message: `Soil moisture is ${soilMoisture.toFixed(1)}%, below the ideal ${soilRange.min}%. Give it a thorough watering.`,
-    });
-  } else if (soilMoisture > soilRange.max) {
-    tips.push({
-      id: "soil-high",
-      icon: Droplets,
-      type: "water",
-      title: "Hold off on watering",
-      message: `Soil moisture is ${soilMoisture.toFixed(1)}%, above the ideal ${soilRange.max}%. Let the soil dry out a bit before watering again.`,
-    });
-  }
-
-  if (temperature > tempRange.max) {
-    tips.push({
-      id: "temp-high",
-      icon: Thermometer,
-      type: "temperature",
-      title: "Move to a cooler spot",
-      message: `Temperature is ${temperature.toFixed(1)}\u00b0C. Consider moving your plant away from direct sunlight or heat sources.`,
-    });
-  } else if (temperature < tempRange.min) {
-    tips.push({
-      id: "temp-low",
-      icon: Thermometer,
-      type: "temperature",
-      title: "Protect from cold",
-      message: `Temperature is ${temperature.toFixed(1)}\u00b0C, below the ideal minimum. Keep your plant away from cold drafts.`,
-    });
-  }
-
-  if (humidity < humidityRange.min) {
-    tips.push({
-      id: "humidity-low",
-      icon: Wind,
-      type: "temperature",
-      title: "Increase humidity",
-      message: `Humidity is ${humidity.toFixed(1)}%. Try misting the leaves or using a pebble tray.`,
-    });
-  } else if (humidity > humidityRange.max) {
-    tips.push({
-      id: "humidity-high",
-      icon: Wind,
-      type: "temperature",
-      title: "Improve airflow",
-      message: `Humidity is ${humidity.toFixed(1)}%. Increase ventilation to prevent mold or root rot.`,
-    });
-  }
-
-  if (reading.motion) {
-    tips.push({
-      id: "motion",
-      icon: Activity,
-      type: "water",
-      title: "Motion detected nearby",
-      message: "Something moved near your plant recently. Make sure pets or drafts aren't disturbing it.",
-    });
-  }
-
-  if (tips.length === 0) {
-    tips.push({
-      id: "all-good",
-      icon: Sparkles,
-      type: "water",
-      title: "Your plant is thriving",
-      message: "All readings are within the ideal range. Keep up the great care!",
-    });
-  }
-
-  return tips;
-}
+import { useState, useRef, useEffect } from "react";
+import { Sparkles, Send, Bot, User } from "lucide-react";
 
 function AICare() {
-  const { online, reading } = useDeviceStatus();
-  const { ranges } = useSettings();
+  const [messages, setMessages] = useState([
+    { role: "ai", text: "Hello! I am GreenPulse. Ask me anything about your plant's current health." }
+  ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
 
-  const tips = useMemo(
-    () => buildTips(reading, online, ranges),
-    [reading, online, ranges]
-  );
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    const userMsg = { role: "user", text: input };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: userMsg.text }),
+      });
+      const json = await response.json();
+
+      if (json.success) {
+        setMessages((prev) => [...prev, { role: "ai", text: json.answer }]);
+      } else {
+        setMessages((prev) => [...prev, { role: "ai", text: json.message }]);
+      }
+    } catch (error) {
+      setMessages((prev) => [...prev, { role: "ai", text: "Connection error. Make sure your server is running." }]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="dashboard-page">
-
       <div className="page-heading">
         <div>
           <p className="eyebrow">SMART CARE</p>
-          <h1>AI Care</h1>
+          <h1>AI Assistant</h1>
           <p className="page-description">
-            Get intelligent recommendations for your plant.
+            Chat directly with your plant's care agent.
           </p>
         </div>
       </div>
 
-      <div className="dashboard-panel">
-        <div className="panel-header">
+      <div className="dashboard-panel" style={{ display: 'flex', flexDirection: 'column', height: '60vh' }}>
+        <div className="panel-header" style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
           <div>
-            <p className="eyebrow">INSIGHTS</p>
-            <h3>Today's Recommendations</h3>
+            <p className="eyebrow">INTERACTIVE</p>
+            <h3>Ask GreenPulse</h3>
           </div>
-
           <Sparkles size={22} />
         </div>
 
-        {tips.map((tip) => {
-          const Icon = tip.icon;
-
-          return (
-            <div className="recommendation" key={tip.id}>
-              <div className={`recommendation-icon ${tip.type}`}>
-                <Icon size={17} />
-              </div>
-
-              <div>
-                <strong>{tip.title}</strong>
-                <p>{tip.message}</p>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          {messages.map((msg, index) => (
+            <div key={index} style={{
+              display: 'flex',
+              gap: '12px',
+              alignItems: 'flex-start',
+              flexDirection: msg.role === 'user' ? 'row-reverse' : 'row'
+            }}>
+              <div style={{
+                background: msg.role === 'user' ? '#62d98b' : '#1e293b',
+                color: msg.role === 'user' ? '#000' : '#fff',
+                padding: '12px 16px',
+                borderRadius: '12px',
+                maxWidth: '75%',
+                fontSize: '14px',
+                lineHeight: '1.5'
+              }}>
+                {msg.text}
               </div>
             </div>
-          );
-        })}
-      </div>
+          ))}
+          {loading && (
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <Bot size={24} style={{ color: '#82958a' }} />
+              <div style={{ color: '#82958a', fontSize: '13px' }}>GreenPulse is thinking...</div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
 
+        <form onSubmit={sendMessage} style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: '10px' }}>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="e.g., Does my plant need watering today?"
+            style={{
+              flex: 1,
+              background: '#0d1813',
+              border: '1px solid rgba(255,255,255,0.1)',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              color: '#fff',
+              outline: 'none'
+            }}
+          />
+          <button type="submit" disabled={loading || !input.trim()} style={{
+            background: '#62d98b',
+            border: 'none',
+            borderRadius: '8px',
+            padding: '0 20px',
+            color: '#000',
+            cursor: 'pointer',
+            opacity: loading || !input.trim() ? 0.5 : 1
+          }}>
+            <Send size={18} />
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
